@@ -7,9 +7,6 @@ from distbports import Ports
 from datetime import datetime, timedelta
 import timezonefinder, pytz
 
-from dateutil.tz import gettz
-
-
 class LoadingComputer:
 
     def __init__(self, master):
@@ -26,12 +23,17 @@ class LoadingComputer:
         self.portlist = sorted(self.portscities)
         self.numberofports = len(self.ports.dist)
         self.listChem = self.portlist
+        self._dpzd = 0
 
         # Initialize main tkinter frame
 
         self.frame = Frame(master, borderwidth=3, padx=5, pady=5, background=self.back) #relief=RIDGE,
         self.frame.pack(fill=BOTH)
         self.entryRibbon()
+
+
+
+
 
         # Arguments
         self.lpname = ""
@@ -42,133 +44,133 @@ class LoadingComputer:
     def entryRibbon(self):
 
         # ----- LAYOUT ENTRY RIBBON
-
-        columnNames = ['CITY', 'COUNTRY', 'LATITUDE', 'LONGITUDE']
-        columns =[0, 1, 2, 3]
-        widths = [40, 40, 25, 25]
+        columnNames = ['CITY', 'COUNTRY', 'LATITUDE', 'LONGITUDE', 'ZONE DESCRIPTION']
+        columns =[0, 1, 2, 3,4]
+        widths = [40, 40, 25, 25, 25]
         self.optionList = self.listChem
 
-        # Execute header layout
-
+        # Execute header layout column names HEADER
         for y in range(0,len(columnNames)):
-
             self.spacer = Label(self.frame, text=columnNames[y], width=widths[y], background=self.back)
             self.spacer.grid(row=1, column=columns[y])
 
-        # Load port optionmenu
-
+        # Load port optionmenu HEADER
         self.v=StringVar()
         self.v.set('Load Port')
         self.productName = OptionMenu(self.frame, self.v, *self.optionList, command=self.loadport)
         self.productName.config(background=self.back, fg='white')
         self.productName.grid(row=2, column=0, sticky=E+W)
 
-        # Discharge port optionmenu
-
+        # Discharge port optionmenu HEADER
         self.r = StringVar()
         self.r.set('Discharge Port')
         self.productName = OptionMenu(self.frame, self.r, *self.optionList, command=self.dischport)
         self.productName.config(background=self.back, fg='white')
         self.productName.grid(row=4, column=0, sticky=E+W)
 
-        # Loadport results
+        # Loadport label results HEADER
+        self.lpcountry = Label(self.frame, background = self.back); self.lpcountry.grid(row=2, column=1)
+        self.lplat = Label(self.frame, background=self.back); self.lplat.grid(row=2, column=2)
+        self.lplong = Label(self.frame, background=self.back); self.lplong.grid(row=2, column=3)
+        self.lpzd = Label(self.frame, background=self.back); self.lpzd.grid(row=2, column=4)
 
-        self.lpcountry = Label(self.frame, background = self.back)
-        self.lpcountry.grid(row=2, column=1)
-
-        self.lplat = Label(self.frame, background=self.back)
-        self.lplat.grid(row=2, column=2)
-
-        self.lplong = Label(self.frame, background=self.back)
-        self.lplong.grid(row=2, column=3)
-
-        # Dischport results
-
-        self.dpcountry = Label(self.frame, background = self.back)
-        self.dpcountry.grid(row=4, column=1)
-
-        self.dplat = Label(self.frame, background=self.back)
-        self.dplat.grid(row=4, column=2)
-
-        self.dplong = Label(self.frame, background=self.back)
-        self.dplong.grid(row=4, column=3)
+        # Dischport label results HEADER
+        self.dpcountry = Label(self.frame, background = self.back); self.dpcountry.grid(row=4, column=1)
+        self.dplat = Label(self.frame, background=self.back); self.dplat.grid(row=4, column=2)
+        self.dplong = Label(self.frame, background=self.back); self.dplong.grid(row=4, column=3)
+        self.dpzd = Label(self.frame, background=self.back); self.dpzd.grid(row=4, column=4)
 
         # Grid spacer
-        self.space = Label(self.frame)
-        self.space.config(background=self.back, fg='white')
-        self.space.grid(row=6, column=0, sticky=E + W)
+        self.space = Label(self.frame); self.space.config(background=self.back, fg='white'); self.space.grid(row=6, column=0, sticky=E + W)
 
-        # Distance label
-
-        self.d = Label(self.frame, text='Distance in Nautical Miles')
-        self.d.config(background=self.back)
-        self.d.grid(row=8, column=0, sticky=E)
+        # Distance label: 'Distance in Nautical Miles' and distance number i.e. 6530
+        self.dnm = Label(self.frame, text='Distance in Nautical Miles')
+        self.dnm.config(background=self.back)
+        self.dnm.grid(row=8, column=0, sticky=E)
 
         self.dt = Label(self.frame, text='')
         self.dt.config(background=self.back)
         self.dt.grid(row=8, column=1, sticky=W)
 
-
         # Grid spacer
-        self.space = Label(self.frame)
-        self.space.config(background=self.back, fg='white')
-        self.space.grid(row=9, column=0, sticky=E + W)
+        self.space = Label(self.frame); self.space.config(background=self.back, fg='white'); self.space.grid(row=9, column=0, sticky=E + W)
 
         # @ 10 KT
-
         self.d = Label(self.frame, text='10 Knots')
         self.d.config(background=self.back)
         self.d.grid(row=90, column=0, sticky=E)
 
         self.ten = Label(self.frame, text='')
         self.ten.config(background=self.back)
-        self.ten.grid(row=90, column=1, sticky=W)
+        self.ten.grid(row=90, column=4, sticky=W)
 
         # @ 12.5 KT
-
         self.d = Label(self.frame, text='12.5 Knots')
         self.d.config(background=self.back)
         self.d.grid(row=100, column=0, sticky=E)
 
         self.twelve = Label(self.frame, text='')
         self.twelve.config(background=self.back)
-        self.twelve.grid(row=100, column=1, sticky=W)
+        self.twelve.grid(row=100, column=4, sticky=W)
 
         # @ 15 KT
-
         self.d = Label(self.frame, text='15 Knots')
         self.d.config(background=self.back)
         self.d.grid(row=110, column=0, sticky=E)
 
         self.fifteen = Label(self.frame, text='')
         self.fifteen.config(background=self.back)
-        self.fifteen.grid(row=110, column=1, sticky=W)
-
-
+        self.fifteen.grid(row=110, column=4, sticky=W)
 
         # Grid spacer
         self.space = Label(self.frame)
         self.space.config(background=self.back, fg='white')
         self.space.grid(row=200, column=0, sticky=E + W)
 
+        # ETA ENTRY
+        self.vknot = StringVar()
+        self.ent = Entry(self.frame,textvariable=self.vknot)
+        self.ent.config(fg=self.back)
+        self.ent.grid(row=300, column=0, sticky=E + W)
+
+        # ETA BUTTON
+        self.knot = Button(self.frame, command=self.calccustometa)
+        self.knot.config( text="Calculate ETA", bg=self.back)
+        self.knot.grid(row=300, column=1, sticky=E + W)
+
+        # ETA LABEL
+        self.custeta = Label(self.frame)
+        self.custeta.config(background=self.back, highlightbackground = self.back)
+        self.custeta.grid(row=300, column=4, sticky=E + W)
 
         # Quit
-
         self.quit = Button(text="Quit", anchor="s", command=self.frame.quit)
+        self.quit.config(background=self.back)
         self.quit.pack(fill='both',pady = 5)
 
+    def calccustometa(self):
+
+        try:
+            self.custeta.destroy()
+            spddist = int(self.distance)
+            t = float(self.vknot.get())
+            tdfift = datetime.utcnow() + timedelta(days=((float(spddist / t) / 24)) + (self._dpzd / 24))
+            tdfift = tdfift.strftime("%H:00 / %d %b LT")
+
+            # Grid spacer
+            self.custeta = Label(self.frame, text = tdfift)
+            self.custeta.config()
+            self.custeta.grid(row=300, column=4, sticky=E + W)
+        except:
+            pass
+
     def calculate(self):
-
-
-
         self.dt.destroy()
-
         try:
 
             self.ten.destroy()
             self.twelve.destroy()
             self.fifteen.destroy()
-
             self.distance = self.lptable[self.dpname]
             self.dt = Label(self.frame, text=self.distance)
             self.dt.config(background=self.back)
@@ -176,94 +178,63 @@ class LoadingComputer:
 
             spddist = int(self.distance)
 
-            ten = str(int(round((int(spddist / 10)/24),0) ))  + " Days    "+    str(     (int(spddist / 10)) % 24)   + " Hours "
-            twel = str(int(round((int(spddist / 12.5)/24),0) ))  + " Days    "+    str(     (int(spddist / 12.5)) % 24)   + " Hours "
-            fifteen = str(int(round((int(spddist / 15)/24),0) ))  + " Days    "+    str(     (int(spddist / 15)) % 24)   + " Hours "
+            ten = str(int(round((int(spddist / 10)/24),0) ))  + " Days "+    str(     (int(spddist / 10)) % 24)   + " Hours "
+            twel = str(int(round((int(spddist / 12.5)/24),0) ))  + " Days "+    str(     (int(spddist / 12.5)) % 24)   + " Hours "
+            fifteen = str(int(round((int(spddist / 15)/24),0) ))  + " Days "+    str(     (int(spddist / 15)) % 24)   + " Hours "
 
+            tdten = datetime.utcnow()+ timedelta(days=((float(spddist / 10.0)/24))+(self._dpzd/24))
+            tdten = tdten.strftime("%H:00 / %d %b LT")
 
+            tdtwel = datetime.utcnow()+ timedelta(days=((float(spddist / 12.5)/24))+(self._dpzd/24))
+            tdtwel = tdtwel.strftime("%H:00 / %d %b LT")
 
-
-
-
-
-            tdten = datetime.now() + timedelta(days=int(round((int(spddist / 10)/24),0) ))  + timedelta(hours=(int(spddist / 10)) % 24)
-            tdten = tdten.strftime("%H:00 / %d %b (%A)")
-
-            tdtwel = datetime.now() + timedelta(days=int(round((int(spddist / 12.5)/24),0) ))  + timedelta(hours=(int(spddist / 12.5)) % 24)
-            tdtwel = tdtwel.strftime("%H:00 / %d %b (%A)")
-
-            tdfift = datetime.now() + timedelta(days=int(round((int(spddist / 15)/24),0) ))  + timedelta(hours=(int(spddist / 15)) % 24)
-            tdfift = tdfift.strftime("%H:00 / %d %b (%A)")
+            tdfift = datetime.utcnow()+ timedelta(days=((float(spddist / 15)/24))+(self._dpzd/24))
+            tdfift = tdfift.strftime("%H:00 / %d %b LT")
 
             # @ 10 KT
-
             self.ten = Label(self.frame, text=ten)
             self.ten.config(background=self.back)
             self.ten.grid(row=90, column=1, sticky=W+E)
 
-
             # @ 10 KT
-
             self.ten = Label(self.frame, text=tdten)
             self.ten.config(background=self.back)
-            self.ten.grid(row=90, column=2, sticky=W)
-
+            self.ten.grid(row=90, column=4, sticky=W+E)
 
             # @ 12.5 KT
-
             self.twelve = Label(self.frame, text=twel)
             self.twelve.config(background=self.back)
             self.twelve.grid(row=100, column=1, sticky=W+E)
 
             # @ 12.5 KT
-
             self.twelve = Label(self.frame, text=tdtwel)
             self.twelve.config(background=self.back)
-            self.twelve.grid(row=100, column=2, sticky=W)
-
+            self.twelve.grid(row=100, column=4, sticky=W+E)
 
             # @ 15 KT
-
             self.fifteen = Label(self.frame, text=fifteen)
             self.fifteen.config(background=self.back)
             self.fifteen.grid(row=110, column=1, sticky=W+E)
-
-
 
             # @ 15 KT
 
             self.fifteen = Label(self.frame, text=tdfift)
             self.fifteen.config(background=self.back)
-            self.fifteen.grid(row=110, column=2, sticky=W)
-
+            self.fifteen.grid(row=110, column=4, sticky=W+E)
 
         except:
             pass
-
-
         pass
 
-
-    def gettimezone(self, lat, long):
-
-        from pytz import timezone
-        # http://pytz.sourceforge.net/
-
-        # https://stackoverflow.com/questions/15742045/getting-time-zone-from-lat-long-coordinates
-        tf = timezonefinder.TimezoneFinder()
-
-
-        tz = tf.certain_timezone_at(lat=lat, lng=long)
-
-        tz = datetime.now(pytz.timezone(tz)).strftime('%z')
-
-        return tz
-
-
-
-
-
     def loadport(self, prodName):
+
+        def gettimezone(lat, long):
+
+            tf = timezonefinder.TimezoneFinder()
+            tz = tf.certain_timezone_at(lat=lat, lng=long)
+            tz = datetime.now(pytz.timezone(tz)).strftime('%z')
+
+            return tz
 
         self.lpname = prodName
 
@@ -282,13 +253,17 @@ class LoadingComputer:
         long = float(outcome['longitude'])
         long = round(long, 1)
 
-        lptz = self.gettimezone(lat, long)
+        lptz = gettimezone(lat, long)
 
-        print(lptz)
+        try:
+            lptz = gettimezone(lat, long)
+        except:
+            lptz = 'NaN'
 
         self.lpcountry.destroy()
         self.lplat.destroy()
         self.lplong.destroy()
+        self.lpzd.destroy()
 
         # Loadport results
 
@@ -301,13 +276,25 @@ class LoadingComputer:
         self.lplong = Label(self.frame, text=long, background=self.back)
         self.lplong.grid(row=2, column=3)
 
+        self.lpzd = Label(self.frame, text=lptz, background=self.back)
+        self.lpzd.grid(row=2, column=4)
+
         self.calculate()
 
     def dischport(self, prodName):
 
-        self.dpname = prodName
+        def gettimezone(lat, long):
 
-        print(self.dpname)
+
+
+            tf = timezonefinder.TimezoneFinder()
+            tz = tf.certain_timezone_at(lat=lat, lng=long)
+
+            utc_offset_time = datetime.now(pytz.timezone(tz))
+
+            return utc_offset_time
+
+        self.dpname = prodName
 
         portgen = (x for x in range(0, self.numberofports))  # generator function
 
@@ -316,8 +303,6 @@ class LoadingComputer:
             if self.ports.dist[ind]['properties']['city'] == prodName:
                 outcome = self.ports.dist[ind]['properties']
                 break
-        print(outcome)
-        print()
 
         lat = float(outcome['latitude'])
         lat = round(lat, 1)
@@ -325,9 +310,25 @@ class LoadingComputer:
         long = float(outcome['longitude'])
         long = round(long, 1)
 
+        try:
+            dptz = gettimezone(lat, long)
+
+            dptz = dptz.strftime('%z') # get just zone description
+            sign = dptz[:1]
+            intn = int(dptz[1:3])
+            if sign == '-': intn = -intn
+            else: pass
+
+
+            self._dpzd = intn
+
+        except:
+            dptz = 'NaN'
+
         self.dpcountry.destroy()
         self.dplat.destroy()
         self.dplong.destroy()
+        self.dpzd.destroy()
 
         # Dischport results
 
@@ -340,6 +341,9 @@ class LoadingComputer:
         self.dplong = Label(self.frame, text=long, background=self.back)
         self.dplong.grid(row=4, column=3)
 
+        self.lpzd = Label(self.frame, text=dptz, background=self.back)
+        self.lpzd.grid(row=4, column=4)
+
         self.calculate()
 
     def quit(self):
@@ -349,6 +353,19 @@ def main():
 
     root = Tk()
 
+    # def hello():
+    #     pass
+    #
+    # menubar = Menu(root)
+    # helpmenu = Menu(menubar, tearoff=0)
+    # helpmenu.add_command(label="About", command=hello)
+    # menubar.add_cascade(label="About", menu=helpmenu)
+
+
+    # root.config(menu=menubar)
+
+
+
 
 
 
@@ -356,9 +373,16 @@ def main():
 
 
     root.option_add('*font', ('Helvetica', 12))
-
     app = LoadingComputer(root)
-    root.title("Distances Between Commercial World Ports")
+    root.title("Distances and Estimated Time of Arrival and Between Commercial World Ports")
+
+
+
+
+
+
+
+
 
 
     root.mainloop()
