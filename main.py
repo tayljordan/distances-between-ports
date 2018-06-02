@@ -1,6 +1,11 @@
 #!/usr/bin/python
 #  -*- coding: utf-8 -*-
 
+
+
+# Offline calculation of distances between ports and estimated time of arrival.
+
+
 from tkinter import *
 from distbports import Ports
 
@@ -25,7 +30,9 @@ class LoadingComputer:
         self.listChem = self.portlist
         self._dpzd = 0
 
+
         # Initialize main tkinter frame
+
 
         self.frame = Frame(master, borderwidth=3, padx=5, pady=5, background=self.back) #relief=RIDGE,
         self.frame.pack(fill=BOTH)
@@ -127,26 +134,83 @@ class LoadingComputer:
         self.space.config(background=self.back, fg='white')
         self.space.grid(row=200, column=0, sticky=E + W)
 
+
+
+
+
+        self.footer = Frame()
+        self.footer.pack(fill=BOTH)
+
+
+        # Execute header layout column names HEADER
+        for y in range(0,len(columnNames)):
+            self.spacer = Label(self.footer, width=widths[y])
+            self.spacer.grid(row=0, column=columns[y])
+
+        self.spacer = Label(self.footer, text="KNOTS",pady="5")
+        self.spacer.grid(row=0, column=0)
+
+        self.spacer = Label(self.footer, text="OFFSET, HOURS (not required)",pady="5")
+        self.spacer.grid(row=0, column=1)
+
+
         # ETA ENTRY
         self.vknot = StringVar()
-        self.ent = Entry(self.frame,textvariable=self.vknot)
-        self.ent.config(fg=self.back)
-        self.ent.grid(row=300, column=0, sticky=E + W)
+        self.ent = Entry(self.footer,textvariable=self.vknot)
+        self.ent.config()
+        self.ent.grid(row=20, column=0, sticky=E + W)
+
+
+        # ETA ENTRY
+        self.offset = StringVar()
+
+        self.off = Entry(self.footer,textvariable=self.offset)
+        self.off.config()
+        self.off.grid(row=20, column=1, sticky=E + W)
 
         # ETA BUTTON
-        self.knot = Button(self.frame, command=self.calccustometa)
-        self.knot.config( text="Calculate ETA", bg=self.back)
-        self.knot.grid(row=300, column=1, sticky=E + W)
+        self.knot = Button(self.footer, command=self.calccustometa)
+        self.knot.config(text="Calculate ETA", bg=self.back)
+        self.knot.grid(row=20, column=2, sticky=E + W)
+
 
         # ETA LABEL
-        self.custeta = Label(self.frame)
-        self.custeta.config(background=self.back, highlightbackground = self.back)
-        self.custeta.grid(row=300, column=4, sticky=E + W)
+        self.custeta = Label(self.footer)
+        self.custeta.config()
+        self.custeta.grid(row=20, column=4, sticky=E + W)
+
+
+
+
+        self.spacer = Label()
+        self.spacer.pack(fill='both')
+
+
+        self.fr = Frame(background=self.back)
+        self.fr.pack(fill=BOTH)
+
+        #
+        #
+        #
+        # # Quit
+        # self.quit = Label(self.fr)
+        # self.quit.config(background=self.back)
+        # self.quit.pack(fill='both')
 
         # Quit
-        self.quit = Button(text="Quit", anchor="s", command=self.frame.quit)
-        self.quit.config(background=self.back)
-        self.quit.pack(fill='both',pady = 5)
+        self.quit = Label(self.fr,text="2018 jordantaylor.io")
+        self.quit.config(background=self.back,foreground="#696969")
+        self.quit.pack(anchor="e",padx ="10")
+
+        # Quit
+        self.quit = Button(self.fr,text="Quit", anchor="s",command=self.frame.quit)
+        self.quit.config()
+        self.quit.pack(fill='both')
+
+
+
+
+
 
     def calccustometa(self):
 
@@ -154,18 +218,36 @@ class LoadingComputer:
             self.custeta.destroy()
             spddist = int(self.distance)
             t = float(self.vknot.get())
-            tdfift = datetime.utcnow() + timedelta(days=((float(spddist / t) / 24)) + (self._dpzd / 24))
+
+            try:
+                of = float(self.offset.get())
+                print(of)
+            except:
+                of = 0
+
+            tdfift = datetime.utcnow() + timedelta(days=((float(spddist / t) / 24)) + (self._dpzd / 24) + (of/24))
             tdfift = tdfift.strftime("%H:00 / %d %b LT")
 
             # Grid spacer
-            self.custeta = Label(self.frame, text = tdfift)
+            self.custeta = Label(self.footer, text = tdfift)
             self.custeta.config()
-            self.custeta.grid(row=300, column=4, sticky=E + W)
+
+            self.custeta.grid(row=20, column=4, sticky=E + W)
+
+
+
         except:
-            pass
+            self.custeta = Label(self.footer, text = "")
+            self.custeta.config()
+
+            self.custeta.grid(row=20, column=4, sticky=E + W)
 
     def calculate(self):
         self.dt.destroy()
+        try:
+            self.custeta.destroy()
+        except:
+            pass
         try:
 
             self.ten.destroy()
@@ -374,7 +456,9 @@ def main():
 
     root.option_add('*font', ('Helvetica', 12))
     app = LoadingComputer(root)
-    root.title("Distances and Estimated Time of Arrival and Between Commercial World Ports")
+
+
+    root.title("Distances and Estimated Time of Arrival Between Commercial World Ports")
 
 
 
