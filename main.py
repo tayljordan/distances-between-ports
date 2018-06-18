@@ -11,6 +11,10 @@ from tkinter import *
 from distbports import Ports
 
 from datetime import datetime, timedelta
+
+#cx_freeze needed to import these explicitly (they are needed by timezonefinder)
+import numpy.core._methods, numpy.lib.format
+
 import timezonefinder, pytz
 
 class LoadingComputer:
@@ -24,7 +28,10 @@ class LoadingComputer:
         # Initialize port distance database from JSON file located at /distances/distances_json
 
         #path_to_distance_tables = '/Users/jordantaylor/PycharmProjects/distances/distances_json'
-        path_to_distance_tables = os.path.dirname(os.path.abspath(__file__))
+        if getattr(sys, 'frozen', False):
+            path_to_distance_tables = os.path.dirname(sys.executable)
+        else:
+            path_to_distance_tables = os.path.dirname(os.path.abspath(__file__))
         self.ports = Ports(path_to_distance_tables)
         self.portscities = list(set(self.ports.cities))
         self.portlist = sorted(self.portscities)
