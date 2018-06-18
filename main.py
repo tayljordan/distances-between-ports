@@ -5,6 +5,7 @@
 
 # Offline calculation of distances between ports and estimated time of arrival.
 
+import os
 
 from tkinter import *
 from distbports import Ports
@@ -22,7 +23,8 @@ class LoadingComputer:
 
         # Initialize port distance database from JSON file located at /distances/distances_json
 
-        path_to_distance_tables = '/Users/jordantaylor/PycharmProjects/distances/distances_json'
+        #path_to_distance_tables = '/Users/jordantaylor/PycharmProjects/distances/distances_json'
+        path_to_distance_tables = os.path.dirname(os.path.abspath(__file__))
         self.ports = Ports(path_to_distance_tables)
         self.portscities = list(set(self.ports.cities))
         self.portlist = sorted(self.portscities)
